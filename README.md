@@ -1,7 +1,7 @@
 # ireland-weather-data
 This repo is for my Data Mining and Knowledge Discovery Project.
 
-In this project, we were required to choose a dataset online, and tasked with finding interesting and unexpected insights into the data. More details on the project brief are outlined in the `brief.pdf` file.
+In this project, we were required to choose a dataset online, and tasked with finding interesting and unexpected insights into the data.
 
 I chose a [dataset](https://www.kaggle.com/datasets/dariasvasileva/hourly-weather-data-in-ireland-from-24-stations) which contains hourly weather data from 20 weather stations around Ireland for up to 30 years (depending on the station).
 - I specifically focused on the Valentia Island weather station, as this is closest to my hometown in Ireland.
