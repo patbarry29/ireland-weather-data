@@ -172,6 +172,14 @@ weather_data_post_2012 <- weather_data_post_2012 %>%
 
 head(weather_data_post_2012)
 
+# 3. modify weather_data to remove all 2022 data to keep yearly averages consistent
+max_date <- max(weather_data$date, na.rm = TRUE)
+max_year <- year(max_date)
+max_year
+weather_data <- weather_data %>%
+  filter(year < max_year)
+
+
 # --- DECODE WEATHER CODES ---
 print("Distribution of present_weather (ww)")
 table(weather_data_pre_2012$present_weather, useNA = "ifany")
@@ -274,3 +282,4 @@ write.csv(weather_data_pre_2012,
 write.csv(weather_data_post_2012,
           file.path(output_dir, "weather_data_post_2012.csv"),
           row.names = FALSE)
+
