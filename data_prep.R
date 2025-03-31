@@ -158,6 +158,59 @@ select(weather_data, hour:week_of_year)
 
 head(weather_data)
 
+# --- IMPUTE MISSING DATA ---
+weather_data <- weather_data %>%
+  group_by(month, hour) %>%
+  mutate(
+    # use monthly/hourly averages
+    monthly_hourly_temp_avg = mean(temperature, na.rm = TRUE),
+    monthly_hourly_wb_avg = mean(wet_bulb_temp, na.rm = TRUE),
+    monthly_hourly_dp_avg = mean(dew_point, na.rm = TRUE),
+    monthly_hourly_vp_avg = mean(vapor_pressure, na.rm = TRUE),
+    monthly_hourly_rh_avg = mean(relative_humidity, na.rm = TRUE),
+    monthly_hourly_slp_avg = mean(sea_level_pressure, na.rm = TRUE),
+    monthly_hourly_ws_avg = mean(wind_speed, na.rm = TRUE),
+    monthly_hourly_precip_avg = mean(precipitation, na.rm = TRUE),
+    monthly_hourly_sun_avg = mean(sunshine_duration, na.rm = TRUE)
+  ) %>%
+  ungroup() %>%
+  mutate(
+    temperature = ifelse(is.na(temperature), monthly_hourly_temp_avg, temperature),
+    wet_bulb_temp = ifelse(is.na(wet_bulb_temp), monthly_hourly_wb_avg, wet_bulb_temp),
+    dew_point = ifelse(is.na(dew_point), monthly_hourly_dp_avg, dew_point),
+    vapor_pressure = ifelse(is.na(vapor_pressure), monthly_hourly_vp_avg, vapor_pressure),
+    relative_humidity = ifelse(is.na(relative_humidity), monthly_hourly_rh_avg, relative_humidity),
+    sea_level_pressure = ifelse(is.na(sea_level_pressure), monthly_hourly_slp_avg, sea_level_pressure),
+    wind_speed = ifelse(is.na(wind_speed), monthly_hourly_ws_avg, wind_speed),
+    precipitation = ifelse(is.na(precipitation) & irain_factor == "Trace/Sum_Precip", 0,
+                  ifelse(is.na(precipitation), monthly_hourly_precip_avg, precipitation)),
+    sunshine_duration = ifelse(is.na(sunshine_duration), monthly_hourly_sun_avg, sunshine_duration)
+  ) %>%
+  select(-contains("_avg"))
+
+# wind direction
+wind_dir_mode <- weather_data %>%
+  filter(!is.na(wind_direction)) %>%
+  group_by(month, hour) %>%
+  summarize(
+    mode_direction = as.numeric(names(which.max(table(wind_direction)))),
+    .groups = "drop"
+  )
+
+# Join with original data and fill missing values
+weather_data <- weather_data %>%
+  left_join(wind_dir_mode, by = c("month", "hour")) %>%
+  mutate(
+    wind_direction = ifelse(is.na(wind_direction), mode_direction, wind_direction)
+  ) %>%
+  select(-mode_direction)
+
+# Verify no missing values remain
+missing_after <- sapply(weather_data, function(x) sum(is.na(x)))
+print("Columns with remaining missing values:")
+print(missing_after[missing_after > 0])
+
+
 # --- CREATE TWO DATASETS ---
 # 1. weather_data_pre_2012: Contains all data before April 2nd 2012
 weather_data_pre_2012 <- weather_data %>%
@@ -264,12 +317,13 @@ weather_data_pre_2012 <- weather_data_pre_2012 %>%
 
 table(weather_data_pre_2012$cloud_height, useNA = "ifany")
 
-
 # --- SAVE DATASETS TO NEW FILES ---
-output_dir <- "/Users/pb/Documents/university/ujm/sem2/data-mining/project/ireland-weather-data/processed_data"
+output_dir <- "/Users/pb/Documents/university/ujm/sem2/data-mining/project/ireland-weather-data/data/processed_data"
 if (!dir.exists(output_dir)) {
   dir.create(output_dir, recursive = TRUE)
 }
+
+unique(weather_data_pre_2012$present_weather_intensity)
 
 write.csv(weather_data,
           file.path(output_dir, "weather_data_complete.csv"),
@@ -282,4 +336,3 @@ write.csv(weather_data_pre_2012,
 write.csv(weather_data_post_2012,
           file.path(output_dir, "weather_data_post_2012.csv"),
           row.names = FALSE)
-

@@ -59,8 +59,8 @@ for (var in vars_to_analyze) {
     geom_smooth(method = "lm", se = FALSE, color = "tomato", linetype = "dashed", linewidth = 0.5) +
     facet_wrap(~ season, ncol = 2) +
     labs(
-      title = paste("Yearly Trend by Season:", gsub("_", " ", tools::toTitleCase(var))),
-      subtitle = plot_subtitle,
+      # title = paste("Yearly Trend by Season:", gsub("_", " ", tools::toTitleCase(var))),
+      # subtitle = plot_subtitle,
       x = "Year",
       y = paste("Average", gsub("_", " ", var))
     ) +
@@ -73,13 +73,25 @@ for (var in vars_to_analyze) {
   faceted_seasonal_plot_list[[var]] <- p
 }
 
+
+pdf("precipitation_seasons.pdf", width = 7, height = 5)
 print(faceted_seasonal_plot_list[["precipitation"]])
+dev.off()
 
+# Plot 2: Temperature
+pdf("temperature_seasons.pdf", width = 7, height = 5)
 print(faceted_seasonal_plot_list[["temperature"]])
+dev.off()
 
+# Plot 3: Relative Humidity
+pdf("relative_humidity_seasons.pdf", width = 7, height = 5)
 print(faceted_seasonal_plot_list[["relative_humidity"]])
+dev.off()
 
+# Plot 4: Wind Speed
+pdf("wind_speed_seasons.pdf", width = 7, height = 5)
 print(faceted_seasonal_plot_list[["wind_speed"]])
+dev.off()
 
 
 #### ----------------------

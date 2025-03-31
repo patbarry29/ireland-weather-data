@@ -135,7 +135,7 @@ After 2012, several sensors seem to have broken/been turned off.
 
 ## Removing 2022
 
-- I removed the year 2022 from the data. It only has data for all of January. So it throws off yearly averages.
+- I removed the year 2022 from the data. It only has data for all of January, so it throws off yearly averages.
 
 
 
